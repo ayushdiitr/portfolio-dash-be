@@ -13,14 +13,14 @@ const getGoogleFinRes = async (
   logger.debug({ symbol }, 'Fetching fundamentals from Google Finance');
 
   try {
-    const url = `https://www.google.com/finance/quote/${symbol}`;
+    const url = `https://www.google.com/finance/quote/${symbol}:NASDAQ`;
     const response = await axios.get(url, {
       headers: {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
       },
     });
-    logger.info(response.status, 'res status')
+    logger.info({symbol}, 'res status')
     if (response.status !== 200) {
       throw new Error(`Google Finance error: ${response.status}`);
     }
@@ -49,7 +49,14 @@ logger.info({
 
     
     
-    let peRatio: number | null = Number(metrics['P/E ratio']) ?? null;
+    let peRatio: number | null = null;
+    const peRatioStr = metrics['P/E ratio'];
+    if (peRatioStr) {
+      const parsed = Number(peRatioStr);
+      if (!isNaN(parsed)) {
+        peRatio = parsed;
+      }
+    }
     
 
 

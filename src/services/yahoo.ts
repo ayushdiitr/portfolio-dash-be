@@ -21,9 +21,9 @@ const fetchCMPInternal = async (
   logger.debug({ symbol, exchange }, 'CMP...');
   let id = symbol;
   if (exchange === 'NASDAQ') {
-    id = symbol;
+    id = `${symbol}`;
   } else {
-    id = `${symbol}.${exchange}`;
+    id = `${symbol}:${exchange}`;
   }
   try {
     const quote = await yahooFinance.quote(id);
