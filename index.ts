@@ -1,5 +1,6 @@
 import express, { type Request, type Response } from 'express';
 import cors from 'cors';
+import http from 'http';
 import dotenv from 'dotenv';
 import router from './src/routes/index.js';
 import { errorHandler, notFoundHandler } from './src/middleware/errorHandler.js';
@@ -8,6 +9,7 @@ import { startMarketDataWorker, stopMarketDataWorker } from './src/workers/marke
 import { logger } from './src/utils/logger.js';
 import { prisma } from './src/db/prisma.js';
 import { connectRedis, disconnectRedis } from './src/services/redis.js';
+import { startWS } from './src/websocket/socket.js';
 
 dotenv.config();
 
@@ -27,7 +29,10 @@ app.use('/api/', router);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-const server = app.listen(PORT, () => {
+const server = http.createServer(app);
+startWS(server)
+
+server.listen(PORT, () => {
   logger.info({ port: PORT }, 'Server started');
   startMarketDataWorker();
   connectRedis();
@@ -55,12 +60,3 @@ const stopServer = async (signal: string) => {
 
 process.on('SIGTERM', () => stopServer('SIGTERM'));
 process.on('SIGINT', () => stopServer('SIGINT'));
-
-process.on('unhandledRejection', (reason, promise) => {
-  logger.error({ reason, promise }, 'Unhandled rejection');
-});
-
-process.on('uncaughtException', (error) => {
-  logger.error({ error }, 'Uncaught exception');
-  process.exit(1);
-});
