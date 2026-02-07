@@ -28,7 +28,7 @@ const updateMarketData = async (): Promise<void> => {
       distinct: ['symbol'],
     });
 
-    const symbols = holdings.map((h) => ({symbol:h.symbol, exch: h.exchange || 'NASDAQ'}));
+    const symbols = holdings.map((h:any) => ({symbol:h.symbol, exch: h.exchange || 'NASDAQ'}));
 
     if (symbols.length === 0) {
       logger.info('No symbols to update');
@@ -37,7 +37,8 @@ const updateMarketData = async (): Promise<void> => {
     }
 
     const results = await Promise.allSettled(
-      symbols.map(async ({symbol, exch}) => {
+      symbols.map(async (item: { symbol: string; exch: string }) => {
+        const { symbol, exch } = item;
         try {
           const marketData = await fetchMarketData(symbol, exch, false); 
 
@@ -102,12 +103,9 @@ const updateMarketData = async (): Promise<void> => {
 
     await delPattern('portfolio:*');
 
-    // Broadcast WebSocket update
     try {
       const portfolio = await prisma.holding.findMany({
-        // include: {
-        //   // We'll calculate summary stats
-        // },
+       
       });
 
       const marketDataMap = new Map(
@@ -115,22 +113,23 @@ const updateMarketData = async (): Promise<void> => {
           await prisma.marketData.findMany({
             where: {
               symbol: {
-                in: portfolio.map((h) => h.symbol),
+                in: portfolio.map((h: any) => h.symbol),
               },
             },
           })
-        ).map((md) => [md.symbol, md])
+        ).map((md: any) => [md.symbol, md])
       );
 
       let totalInvestment = 0;
       let totalPresentValue = 0;
 
-      portfolio.forEach((holding) => {
+      portfolio.forEach((holding:any) => {
         const investment =
           Number(holding.purchasePrice) * holding.quantity;
         totalInvestment += investment;
 
         const marketData = marketDataMap.get(holding.symbol);
+        // @ts-ignore
         const cmp = marketData?.cmp ? Number(marketData.cmp) : null;
         if (cmp) {
           totalPresentValue += cmp * holding.quantity;

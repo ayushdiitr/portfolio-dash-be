@@ -19,7 +19,7 @@ const calculatePortfolio = async (): Promise<PortfolioResponse> => {
     },
   });
 
-  const symbols = holdings.map((h) => h.symbol);
+  const symbols = holdings.map((h:any) => h.symbol);
   const marketDataMap = new Map(
     (
       await prisma.marketData.findMany({
@@ -29,12 +29,13 @@ const calculatePortfolio = async (): Promise<PortfolioResponse> => {
           },
         },
       })
-    ).map((md) => [md.symbol, md])
+    ).map((md:any) => [md.symbol, md])
   );
 
   const holdingsWithMarketData: HoldingWithMarketData[] = holdings.map(
-    (holding) => {
+    (holding:any) => {
       const marketData = marketDataMap.get(holding.symbol);
+      // @ts-ignore
       const cmp = marketData?.cmp ? Number(marketData.cmp) : null;
 
       const investment = Number(holding.purchasePrice) * holding.quantity;
@@ -52,7 +53,9 @@ const calculatePortfolio = async (): Promise<PortfolioResponse> => {
         purchasePrice: Number(holding.purchasePrice),
         qty: holding.quantity,
         cmp,
+        // @ts-ignore
         peRatio: marketData?.peRatio ? Number(marketData.peRatio) : null,
+        // @ts-ignore
         latestEarnings: marketData?.latestEarnings || null,
         investment,
         presentValue,

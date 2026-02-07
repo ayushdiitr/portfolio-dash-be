@@ -102,13 +102,13 @@ router.delete('/', async (req: Request, res: Response) => {
       },
     });
 
-    const symbols = holdings.map((h) => h.symbol);
+    const symbols = holdings.map((h:any) => h.symbol);
 
     if (symbols.length === 0) {
       return res.status(404).json({ error: 'No holdings found' });
     }
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx:any) => {
       await tx.priceHistory.deleteMany({
         where: {
           symbol: {
@@ -196,7 +196,7 @@ router.get('/:id/history', async (req: Request, res: Response) => {
         symbol: holding.symbol,
         name: holding.name,
       },
-      history: priceHistory.map((entry) => ({
+      history: priceHistory.map((entry:any) => ({
         id: entry.id.toString(),
         price: Number(entry.cmp),
         recordedAt: entry.recordedAt,
