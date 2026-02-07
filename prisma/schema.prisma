@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Holding {
+  id String @id @default(uuid())
+  symbol String @unique
+  name String
+  sector String
+  exchange String
+  purchasePrice Decimal @db.Decimal(12, 2)
+  quantity Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([symbol])
+  @@index([sector])
+}
+
+model MarketData {
+  symbol String @id @db.VarChar(20)
+  cmp Decimal? @db.Decimal(12, 2)
+  peRatio Decimal? @db.Decimal(8, 2)
+  latestEarnings String?
+  priceSource String?
+  fundamentalSource String?
+  
+  lastUpdated DateTime @updatedAt @default(now())
+
+  priceHistory PriceHistory[]
+}
+
+model PriceHistory {
+  id BigInt @id @default(autoincrement())
+  symbol String @db.VarChar(20)
+  cmp Decimal @db.Decimal(12, 2)
+  recordedAt DateTime @default(now())
+
+  marketData MarketData @relation(fields: [symbol], references: [symbol])
+
+  @@index([symbol])
+}
