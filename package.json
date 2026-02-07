@@ -16,6 +16,7 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
+    "prisma": "^7.3.0",
     "axios": "^1.13.4",
     "cheerio": "^1.2.0",
     "cors": "^2.8.6",
